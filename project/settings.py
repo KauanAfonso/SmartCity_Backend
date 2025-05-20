@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app',
+    'smart_city',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
@@ -80,7 +80,7 @@ SIMPLE_JWT = {
 
 }
 
-AUTH_USER_MODEL = 'app.Usuario'
+AUTH_USER_MODEL = 'smart_city.Usuario'
 
 ROOT_URLCONF = 'project.urls'
 
