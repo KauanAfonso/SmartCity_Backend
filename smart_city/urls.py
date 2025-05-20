@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import carregar_planilhas
+from .views import upload_sheets
 
 urlpatterns = [
-    path("upload_planilha/", carregar_planilhas, name="upload_planilha")  # A URL associada à view carregar_planilhas
+    path("upload/", view=upload_sheets)  # A URL associada à view carregar_planilhas
 ]

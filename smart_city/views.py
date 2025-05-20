@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Sensor
+from django.shortcuts import get_object_or_404
 
 @api_view(["POST"])
-def carregar_planilhas(request):
+def upload_sheets(request):
     if request.method == "POST":
         try:
             planilha = request.FILES['planilha']
@@ -21,7 +22,6 @@ def carregar_planilhas(request):
             # Verifica se todas as colunas estão presentes no dataframe
             if not all(coluna in df.columns for coluna in colunas_nescessarias):
                 return Response({"Erro": "A planilha não contém as colunas necessárias."}, status=status.HTTP_400_BAD_REQUEST)
-
 
             for index, row, in df.iterrows():
                 dados = Sensor(
@@ -39,4 +39,12 @@ def carregar_planilhas(request):
             return Response({"Mensagem": f"Erro: {e}"}, status=status.HTTP_400_BAD_REQUEST)    
 
          
-       
+@api_view(["GET", "POST"])
+def handle_sensor(pk, request):
+    try:
+        pk = get_object_or_404(Sensor, pk=pk)
+
+        if request.method == "GET":
+            if pk is not None:
+
+
