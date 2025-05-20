@@ -16,7 +16,7 @@ class Sensor(models.Model):
     unidade_med = models.CharField(max_length=255)
     latitude = models.FloatField()
     longitude = models.FloatField()
-    status = models.BooleanField()
+    status = models.CharField(choices=(("inativo", "inativo"), ("ativo", "ativo")), max_length=50)
 
     def __str__(self):
         return self.sensor  
