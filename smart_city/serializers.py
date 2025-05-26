@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Sensor
+from .models import Sensor, Ambiente
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 
@@ -8,7 +8,10 @@ class SensorSerializer(serializers.ModelSerializer):
         model = Sensor
         fields = '__all__'
 
-
+class AmbienteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ambiente
+        fields = '__all__'
 
 user = get_user_model()
 class LoginSerializer(TokenObtainPairSerializer):

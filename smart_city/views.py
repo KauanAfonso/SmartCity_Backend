@@ -3,12 +3,10 @@ from rest_framework.decorators import  api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Sensor
+from .models import Sensor, Ambiente, Historico
 from django.shortcuts import get_object_or_404
-from .serializers import SensorSerializer, LoginSerializer
+from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer
 from django.contrib.auth.models import AbstractUser
-
-
 
 @api_view(["POST"])
 def upload_sheets(request):
@@ -104,3 +102,49 @@ def handle_sensor(request, pk=None):
     
 
             
+
+'''
+
+CRUD para lidar com os sensores
+
+'''         
+@api_view(["GET", "POST", "PUT", "DELETE"])
+def handle_ambiente(request, pk=None):
+        #Obter um sensor em espécifico ou todos de uma vez !
+        if request.method == "GET":
+            if pk is not None:
+                dados = get_object_or_404(Ambiente, pk=pk)
+                serializer = AmbienteSerializer(dados, many=False)
+                return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
+            dados = Ambiente.objects.all()
+            serializer = AmbienteSerializer(dados, many=True)
+            return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
+
+        #Criar um Ambiente novo e salvar no banco
+        elif request.method == "POST":
+            dados = request.data
+            serializer = AmbienteSerializer(data=dados)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"Mensagem": "Ambiente registrado com sucesso !"}, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        #Atualizar um Ambiente específico
+        elif request.method == "PUT":
+            if pk is not None:
+                ambiente = get_object_or_404(Ambiente, pk=pk)
+                dados = request.data
+                serializer = AmbienteSerializer(ambiente, data=dados)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({"Mensagem": "Ambiente atualizado com sucesso !"},status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        #Deletar um Ambiente específico
+        elif request.method == "DELETE":
+            if pk is not None:
+                ambiente = get_object_or_404(Ambiente, pk=pk)
+                ambiente.delete()
+                return Response({"Mensagem": "Ambiente Excluido com sucesso !"},status=status.HTTP_200_OK)
+            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
+    
