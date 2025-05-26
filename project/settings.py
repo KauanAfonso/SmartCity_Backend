@@ -80,7 +80,6 @@ SIMPLE_JWT = {
 
 }
 
-AUTH_USER_MODEL = 'smart_city.Usuario'
 
 ROOT_URLCONF = 'project.urls'
 

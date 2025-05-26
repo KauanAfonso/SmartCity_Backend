@@ -1,15 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-class Usuario(AbstractUser):
-    tipo = models.CharField(
-        max_length=2, 
-        choices=(("A", "Administrador"), ("UC", "Usuário Comum"))
-    )
-
-    def __str__(self):
-        return self.username 
-
 class Sensor(models.Model):
     sensor = models.CharField(max_length=255)
     mac_address = models.CharField(max_length=255) 
@@ -42,3 +33,4 @@ class Historico(models.Model):
 
 
 
+#24240125

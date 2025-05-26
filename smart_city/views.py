@@ -5,7 +5,10 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Sensor
 from django.shortcuts import get_object_or_404
-from .serializers import SensorSerializer
+from .serializers import SensorSerializer, LoginSerializer
+from django.contrib.auth.models import AbstractUser
+
+
 
 @api_view(["POST"])
 def upload_sheets(request):
@@ -18,7 +21,7 @@ def upload_sheets(request):
         try:
             df = pd.read_excel(planilha)
 
-            colunas_nescessarias = ["sensor", "mac_address", "unidade_medida", "longitude", "status", "Kauan"]
+            colunas_nescessarias = ["sensor", "mac_address", "unidade_medida", "longitude", "status"]
 
             # Verifica se todas as colunas estão presentes no dataframe
             if not all(coluna in df.columns for coluna in colunas_nescessarias):
@@ -38,6 +41,20 @@ def upload_sheets(request):
         
         except Exception as e:
             return Response({"Mensagem": f"Erro: {e}"}, status=status.HTTP_400_BAD_REQUEST)    
+
+
+@api_view(["POST"])
+def logar(request):
+    usuario = request.data
+    serializer = LoginSerializer(data=usuario)
+    if serializer.is_valid():
+        return Response({
+            "Mensagem": "Logado com sucesso !",
+            "Usuário": serializer.validated_data['user'],  # pega os dados do usuário
+            "access": serializer.validated_data['access'], 
+            "refresh": serializer.validated_data['refresh'],
+        }, status=status.HTTP_200_OK)
+    return Response({"Mensagem": "Credenciais inválidas"},status=status.HTTP_401_UNAUTHORIZED)  
 
 
 '''
