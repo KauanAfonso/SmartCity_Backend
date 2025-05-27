@@ -25,7 +25,7 @@ class Historico(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     ambiente = models.ForeignKey(Ambiente, on_delete=models.CASCADE)
     valor = models.FloatField()
-    timestamp = models.IntegerField() 
+    timestamp = models.DateTimeField() 
 
     def __str__(self):
         return f"Sensor: {self.sensor}, Ambiente: {self.ambiente}" 
