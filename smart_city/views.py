@@ -5,10 +5,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Sensor, Ambiente, Historico
 from django.shortcuts import get_object_or_404
-from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer
-from django.contrib.auth.models import AbstractUser
+from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer, UsuarioSerializer
 from .functions import upload_ambiente, upload_historico, upload_sensor
-from .filters import SensorFiltro
+from .filters import SensorFiltro,HistoricoSerializer
 #-------------------------------------------------------------------UPLOAD--------------------------------------------------------------------------
 
 @api_view(["POST"])
@@ -63,6 +62,18 @@ def logar(request):
     return Response({"Mensagem": "Credenciais inválidas"},status=status.HTTP_401_UNAUTHORIZED)  
 
 
+
+
+@api_view(["POST"])
+def registrar(request):
+    try:
+        serializer = UsuarioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Mensagem: ": "Usuário registrado com sucesso !"}, status=status.HTTP_201_CREATED)
+        return Response({"Mensagem": serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
+    except Exception as e:
+        return Response({"Mensagem": f"Erro: {e}"}, status=status.HTTP_400_BAD_REQUEST) 
 #-------------------------------------------------------------------Sensores--------------------------------------------------------------------------
 
 '''

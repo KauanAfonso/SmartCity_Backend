@@ -2,8 +2,20 @@ from rest_framework import serializers
 from .models import Sensor, Ambiente, Historico
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 
 
+class UsuarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email']
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password') #retirando a senha 
+        user = User.objects.create(**validated_data)  # Pegando os dados e validando 
+        user.set_password(password) #Hashando a senha
+        user.save() #salvando
+        return user
 #-------------------------------------------------Serializer de Sensor--------------------------------------------------------
 class SensorSerializer(serializers.ModelSerializer):
     class Meta:

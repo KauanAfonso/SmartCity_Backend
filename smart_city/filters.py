@@ -8,3 +8,10 @@ class SensorFiltro(django_filters.FilterSet):
     class Meta:
         model = Sensor
         fields  = ['sensor', 'status']
+
+
+# class HistoricoSerializer(django_filters.FilterSet):
+#     data = django_filters.DateTimeFilter(field_name='data', lookup_expr='icontais')
+#     class Meta:
+#         model = Historico
+#         fields = ["timestamp"]
