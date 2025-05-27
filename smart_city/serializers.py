@@ -37,7 +37,6 @@ class HistoricoSerializer(serializers.ModelSerializer):
         model = Historico
         fields = ["sensor", "ambiente" ,"valor" , "timestamp", "ambiente_nome", "sensor_nome"]
 
-
 #-------------------------------------------------Serializer de Login-----------------------------------------------------------
 class LoginSerializer(TokenObtainPairSerializer):
     username = serializers.CharField()

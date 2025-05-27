@@ -8,6 +8,9 @@ from django.shortcuts import get_object_or_404
 from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer, UsuarioSerializer
 from .functions import upload_ambiente, upload_historico, upload_sensor
 from .filters import SensorFiltro,HistoricoSerializer
+import io
+import openpyxl
+from django.http import HttpResponse
 #-------------------------------------------------------------------UPLOAD--------------------------------------------------------------------------
 
 @api_view(["POST"])
@@ -224,3 +227,18 @@ def handle_historico(request, pk=None):
             return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
     
 
+@api_view(["GET"])
+def exportar_sensores():
+    sensores = Sensor.objects.all().values()
+    df = pd.DataFrame(sensores)
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Sensores")
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="sensores.xlsx"'
+
+    return response
