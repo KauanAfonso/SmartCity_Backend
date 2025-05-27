@@ -3,6 +3,23 @@ import pandas as pd
 from rest_framework.response import Response
 from rest_framework import status
 
+'''
+FUNÇÔES
+
+Essa função tem o objetivo de verificar as colunas nescessarias para realizar o upload das informações
+no banco. Verificam se estão todas presentes na planilha e cria um objeto para o banco.
+O parametro dessas funções são o df, ou seja a planilha que está sendo lendo no momento. Essas
+funções serão utilizadas na ./view.py/upload_sheets
+-------------------------------------------------------------
+
+upload_sensor(df) => Responsável pela planilha de sensores
+upload_historico(df) => Responsável pela planilha de historicos
+upload_ambiente(df) => Responsável pela planilha de ambientes
+
+'''
+
+
+#----------------------------------------------------------------------------------------------------------
 def upload_sensor(df):
     colunas_nescessarias = ["sensor", "mac_address", 'latitude', "unidade_medida", "longitude", "status"]
 
@@ -22,6 +39,7 @@ def upload_sensor(df):
         dados.save()
 
 
+#----------------------------------------------------------------------------------------------------------
 def upload_historico(df):
     colunas_nescessarias = ["sensor", "ambiente" ,"valor" , "timestamp"]
 
@@ -55,6 +73,7 @@ def upload_historico(df):
         dados.save()
 
 
+#----------------------------------------------------------------------------------------------------------
 def upload_ambiente(df):
     colunas_nescessarias = ["sig","descricao","ni", "responsavel"]
 

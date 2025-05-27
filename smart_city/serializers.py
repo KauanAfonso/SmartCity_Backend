@@ -1,19 +1,32 @@
 from rest_framework import serializers
-from .models import Sensor, Ambiente
+from .models import Sensor, Ambiente, Historico
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 
+
+#-------------------------------------------------Serializer de Sensor--------------------------------------------------------
 class SensorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
         fields = '__all__'
 
+#-------------------------------------------------Serializer de Ambiente--------------------------------------------------------
 class AmbienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ambiente
         fields = '__all__'
 
-user = get_user_model()
+#-------------------------------------------------Serializer de Historico--------------------------------------------------------
+class HistoricoSerializer(serializers.ModelSerializer):
+    #Realizando o join para obter informações da tabela relacionada
+    ambiente_nome = serializers.CharField(source='ambiente.descricao', read_only=True)
+    sensor_nome = serializers.CharField(source='sensor.sensor', read_only=True)
+    class Meta:
+        model = Historico
+        fields = ["sensor", "ambiente" ,"valor" , "timestamp", "ambiente_nome", "sensor_nome"]
+
+
+#-------------------------------------------------Serializer de Login-----------------------------------------------------------
 class LoginSerializer(TokenObtainPairSerializer):
     username = serializers.CharField()
     password = serializers.CharField()

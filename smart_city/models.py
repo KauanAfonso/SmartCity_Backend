@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+#-------------------------------------------------------------------Model de Sensores--------------------------------------------------------------------------
 class Sensor(models.Model):
     sensor = models.CharField(max_length=255)
     mac_address = models.CharField(max_length=255) 
@@ -12,6 +13,8 @@ class Sensor(models.Model):
     def __str__(self):
         return self.sensor  
 
+
+#-------------------------------------------------------------------Model de Ambientes--------------------------------------------------------------------------
 class Ambiente(models.Model):
     sig = models.IntegerField()
     descricao = models.CharField(max_length=255)
@@ -21,6 +24,8 @@ class Ambiente(models.Model):
     def __str__(self):
         return self.descricao  
 
+
+#-------------------------------------------------------------------Model de Historicos--------------------------------------------------------------------------
 class Historico(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     ambiente = models.ForeignKey(Ambiente, on_delete=models.CASCADE)
@@ -33,4 +38,4 @@ class Historico(models.Model):
 
 
 
-#24240125
+#24240125 -> Meu codigo de aluno SENAI

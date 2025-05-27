@@ -5,30 +5,36 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Sensor, Ambiente, Historico
 from django.shortcuts import get_object_or_404
-from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer
+from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer
 from django.contrib.auth.models import AbstractUser
 from .functions import upload_ambiente, upload_historico, upload_sensor
+
+#-------------------------------------------------------------------UPLOAD--------------------------------------------------------------------------
 
 @api_view(["POST"])
 def upload_sheets(request):
     if request.method == "POST":
         try:
+            tipos_permitidos = ['sensor', 'historico', 'ambiente']
             planilha = request.FILES['planilha']
             tipo_planilha = request.data["tipo"]
             if tipo_planilha is None:           
                 return Response({"Erro": "Selectione o tipo da planilha."}, status=status.HTTP_400_BAD_REQUEST)
+            elif tipo_planilha not in tipos_permitidos:
+                return Response({"Erro": "Tipo não permitido."}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"Erro": "Aconteceu algum erro para ler a planilha."}, status=status.HTTP_409_CONFLICT)
         
         try:
             df = pd.read_excel(planilha)
-            if tipo_planilha == "sensor":
+            #ao depender do tipo escolido, chamar a função relacionada
+            if tipo_planilha == tipos_permitidos[0]:
                 upload_sensor(df)
 
-            elif tipo_planilha == "historico":
+            elif tipo_planilha == tipos_permitidos[1]:
                 upload_historico(df)
             
-            elif tipo_planilha == "ambiente":
+            elif tipo_planilha == tipos_permitidos[2]:
                 upload_ambiente(df)
 
             return Response({"Mensagem": "Dados criados com sucesso"}, status=status.HTTP_201_CREATED)
@@ -36,7 +42,7 @@ def upload_sheets(request):
         except Exception as e:
             return Response({"Mensagem": f"Erro: {e}"}, status=status.HTTP_400_BAD_REQUEST)    
 
-
+#-------------------------------------------------------------------Login--------------------------------------------------------------------------
 
 '''
 
@@ -56,6 +62,8 @@ def logar(request):
         }, status=status.HTTP_200_OK)
     return Response({"Mensagem": "Credenciais inválidas"},status=status.HTTP_401_UNAUTHORIZED)  
 
+
+#-------------------------------------------------------------------Sensores--------------------------------------------------------------------------
 
 '''
 
@@ -103,11 +111,12 @@ def handle_sensor(request, pk=None):
             return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
     
 
-            
+
+#-------------------------------------------------------------------Ambientes--------------------------------------------------------------------------
 
 '''
 
-CRUD para lidar com os sensores
+CRUD para lidar com os ambientes
 
 '''         
 @api_view(["GET", "POST", "PUT", "DELETE"])
@@ -148,5 +157,54 @@ def handle_ambiente(request, pk=None):
                 ambiente = get_object_or_404(Ambiente, pk=pk)
                 ambiente.delete()
                 return Response({"Mensagem": "Ambiente Excluido com sucesso !"},status=status.HTTP_200_OK)
+            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
+    
+
+
+
+#-------------------------------------------------------------------HISTORICO--------------------------------------------------------------------------
+'''
+
+CRUD para lidar com os históricos
+
+'''         
+@api_view(["GET", "POST", "PUT", "DELETE"])
+def handle_historico(request, pk=None):
+        #Obter um sensor em espécifico ou todos de uma vez !
+        if request.method == "GET":
+            if pk is not None:
+                dados = get_object_or_404(Historico, pk=pk)
+                serializer = HistoricoSerializer(dados, many=False)
+                return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
+            dados = Historico.objects.all()
+            serializer = HistoricoSerializer(dados, many=True)
+            return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
+
+        #Criar um histórico novo e salvar no banco
+        elif request.method == "POST":
+            dados = request.data
+            serializer = HistoricoSerializer(data=dados)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"Mensagem": "histórico registrado com sucesso !"}, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        #Atualizar um histórico específico
+        elif request.method == "PUT":
+            if pk is not None:
+                histórico = get_object_or_404(Historico, pk=pk)
+                dados = request.data
+                serializer = HistoricoSerializer(histórico, data=dados)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({"Mensagem": "histórico atualizado com sucesso !"},status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        #Deletar um histórico específico
+        elif request.method == "DELETE":
+            if pk is not None:
+                histórico = get_object_or_404(Historico, pk=pk)
+                histórico.delete()
+                return Response({"Mensagem": "histórico Excluido com sucesso !"},status=status.HTTP_200_OK)
             return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
     
