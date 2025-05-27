@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer
 from django.contrib.auth.models import AbstractUser
 from .functions import upload_ambiente, upload_historico, upload_sensor
-
+from .filters import SensorFiltro
 #-------------------------------------------------------------------UPLOAD--------------------------------------------------------------------------
 
 @api_view(["POST"])
@@ -78,7 +78,11 @@ def handle_sensor(request, pk=None):
                 dados = get_object_or_404(Sensor, pk=pk)
                 serializer = SensorSerializer(dados, many=False)
                 return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
-            dados = Sensor.objects.all()
+            filtro = SensorFiltro(request.query_params, queryset=Sensor.objects.all())
+            if filtro.is_valid():
+                dados = filtro.qs
+            else:
+                dados = Sensor.objects.all()
             serializer = SensorSerializer(dados, many=True)
             return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
 
@@ -208,3 +212,4 @@ def handle_historico(request, pk=None):
                 return Response({"Mensagem": "histórico Excluido com sucesso !"},status=status.HTTP_200_OK)
             return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
     
+
