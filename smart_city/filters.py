@@ -15,3 +15,9 @@ class SensorFiltro(django_filters.FilterSet):
 #     class Meta:
 #         model = Historico
 #         fields = ["timestamp"]
+
+class AmbienteFiltro(django_filters.FilterSet):
+    sig = django_filters.NumberFilter(field_name="sig", lookup_expr='exact')
+    class Meta:
+        model = Ambiente
+        fields = ["sig"]

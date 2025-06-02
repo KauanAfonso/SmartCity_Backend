@@ -7,13 +7,14 @@ from .models import Sensor, Ambiente, Historico
 from django.shortcuts import get_object_or_404
 from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer, UsuarioSerializer
 from .functions import upload_ambiente, upload_historico, upload_sensor , exportar
-from .filters import SensorFiltro,HistoricoSerializer
+from .filters import SensorFiltro,HistoricoSerializer, AmbienteFiltro
 import io
 import openpyxl
 from django.http import HttpResponse
 #-------------------------------------------------------------------UPLOAD--------------------------------------------------------------------------
-
+  
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])    
 def upload_sheets(request):
     if request.method == "POST":
         try:
@@ -51,6 +52,7 @@ def upload_sheets(request):
 Login 
 
 '''
+
 @api_view(["POST"])
 def logar(request):
     usuario = request.data
@@ -83,8 +85,10 @@ def registrar(request):
 
 CRUD para lidar com os sensores
 
-'''         
+'''  
+   
 @api_view(["GET", "POST", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])    
 def handle_sensor(request, pk=None):
         #Obter um sensor em espécifico ou todos de uma vez !
         if request.method == "GET":
@@ -136,8 +140,10 @@ def handle_sensor(request, pk=None):
 
 CRUD para lidar com os ambientes
 
-'''         
+'''   
+  
 @api_view(["GET", "POST", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])    
 def handle_ambiente(request, pk=None):
         #Obter um sensor em espécifico ou todos de uma vez !
         if request.method == "GET":
@@ -145,7 +151,11 @@ def handle_ambiente(request, pk=None):
                 dados = get_object_or_404(Ambiente, pk=pk)
                 serializer = AmbienteSerializer(dados, many=False)
                 return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
-            dados = Ambiente.objects.all()
+            filtro = AmbienteFiltro(request.query_params, queryset=Ambiente.objects.all())
+            if filtro.is_valid():
+                dados = filtro.qs
+            else:
+                dados = Ambiente.objects.all()
             serializer = AmbienteSerializer(dados, many=True)
             return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
 
@@ -186,7 +196,9 @@ def handle_ambiente(request, pk=None):
 CRUD para lidar com os históricos
 
 '''         
+  
 @api_view(["GET", "POST", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])    
 def handle_historico(request, pk=None):
         #Obter um sensor em espécifico ou todos de uma vez !
         if request.method == "GET":
@@ -226,12 +238,15 @@ def handle_historico(request, pk=None):
                 return Response({"Mensagem": "histórico Excluido com sucesso !"},status=status.HTTP_200_OK)
             return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
     
-
+  
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])    
 def exportar_sensores(request):
     return exportar(request, "Sensores", Sensor)
 
+  
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])    
 def exportar_ambientes(request):
     return exportar(request, "ambientes", Ambiente)
     
