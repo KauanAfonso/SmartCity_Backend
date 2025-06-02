@@ -13,7 +13,6 @@ class Sensor(models.Model):
     def __str__(self):
         return self.sensor  
 
-
 #-------------------------------------------------------------------Model de Ambientes--------------------------------------------------------------------------
 class Ambiente(models.Model):
     sig = models.IntegerField()
@@ -23,7 +22,6 @@ class Ambiente(models.Model):
 
     def __str__(self):
         return self.descricao  
-
 
 #-------------------------------------------------------------------Model de Historicos--------------------------------------------------------------------------
 class Historico(models.Model):

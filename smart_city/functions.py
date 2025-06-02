@@ -98,6 +98,11 @@ def exportar(request, tipo, model):
     tipo = model.objects.all().values()
     df = pd.DataFrame(tipo)
     buffer = io.BytesIO()
+
+    # Remove timezone de todas as colunas do tipo datetime
+    for col in df.select_dtypes(include=['datetimetz']).columns:
+        df[col] = df[col].dt.tz_localize(None)
+        
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name="tipo")
 

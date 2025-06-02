@@ -4,7 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 
-
+#-------------------------------------------------Serializer de Usuário--------------------------------------------------------
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

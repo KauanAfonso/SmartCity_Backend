@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import upload_sheets , handle_sensor , logar, handle_ambiente, handle_historico, registrar,exportar_sensores, exportar_ambientes
+from .views import upload_sheets , handle_sensor , logar, handle_ambiente, handle_historico, registrar,exportar_sensores, exportar_hostorico, exportar_ambientes
 
 urlpatterns = [
     #upload
@@ -24,4 +24,5 @@ urlpatterns = [
     #Exportar
     path("exportar/sensores/", view=exportar_sensores),
     path("exportar/ambientes/", view=exportar_ambientes),
+    path("exportar/historico/", view=exportar_hostorico),
 ]

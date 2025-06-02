@@ -250,3 +250,6 @@ def exportar_sensores(request):
 def exportar_ambientes(request):
     return exportar(request, "ambientes", Ambiente)
     
+@api_view(["GET"])
+def exportar_hostorico(request):
+    return exportar(request, "historico", Historico)
