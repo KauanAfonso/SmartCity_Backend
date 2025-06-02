@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Sensor, Ambiente, Historico
 from django.shortcuts import get_object_or_404
 from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer, UsuarioSerializer
-from .functions import upload_ambiente, upload_historico, upload_sensor
+from .functions import upload_ambiente, upload_historico, upload_sensor , exportar
 from .filters import SensorFiltro,HistoricoSerializer
 import io
 import openpyxl
@@ -228,17 +228,10 @@ def handle_historico(request, pk=None):
     
 
 @api_view(["GET"])
-def exportar_sensores():
-    sensores = Sensor.objects.all().values()
-    df = pd.DataFrame(sensores)
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name="Sensores")
+def exportar_sensores(request):
+    return exportar(request, "Sensores", Sensor)
 
-    response = HttpResponse(
-        buffer.getvalue(),
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename="sensores.xlsx"'
-
-    return response
+@api_view(["GET"])
+def exportar_ambientes(request):
+    return exportar(request, "ambientes", Ambiente)
+    

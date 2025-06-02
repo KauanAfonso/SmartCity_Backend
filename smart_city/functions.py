@@ -2,6 +2,9 @@ from .models import Sensor, Ambiente, Historico
 import pandas as pd
 from rest_framework.response import Response
 from rest_framework import status
+import io
+import openpyxl
+from django.http import HttpResponse
 
 '''
 FUNÇÔES
@@ -88,3 +91,23 @@ def upload_ambiente(df):
             responsavel = row['responsavel'],
             )
         dados.save()
+
+
+#-----------------------------------------------------------------------------
+def exportar(request, tipo, model):
+    tipo = model.objects.all().values()
+    df = pd.DataFrame(tipo)
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="tipo")
+
+
+    buffer.seek(0)  # volta pro começo do buffer para leitura
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="planilha.xlsx"'
+
+    return response
