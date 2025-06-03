@@ -7,7 +7,7 @@ from .models import Sensor, Ambiente, Historico
 from django.shortcuts import get_object_or_404
 from .serializers import SensorSerializer, LoginSerializer ,AmbienteSerializer, HistoricoSerializer, UsuarioSerializer
 from .functions import upload_ambiente, upload_historico, upload_sensor , exportar
-from .filters import SensorFiltro,HistoricoSerializer, AmbienteFiltro
+from .filters import SensorFiltro,HistoricoSerializer, AmbienteFiltro , HistoricoFilter
 import io
 import openpyxl
 from django.http import HttpResponse
@@ -32,13 +32,20 @@ def upload_sheets(request):
             df = pd.read_excel(planilha)
             #ao depender do tipo escolido, chamar a função relacionada
             if tipo_planilha == tipos_permitidos[0]:
-                upload_sensor(df)
+                response = upload_sensor(df)
+                if isinstance(response, Response):
+                    return response               
+
 
             elif tipo_planilha == tipos_permitidos[1]:
-                upload_historico(df)
-            
+                response = upload_historico(df)
+                if isinstance(response, Response):
+                    return response   
+                        
             elif tipo_planilha == tipos_permitidos[2]:
-                upload_ambiente(df)
+                response = upload_ambiente(df)
+                if isinstance(response, Response):
+                    return response
 
             return Response({"Mensagem": "Dados criados com sucesso"}, status=status.HTTP_201_CREATED)
         
@@ -65,7 +72,6 @@ def logar(request):
             "refresh": serializer.validated_data['refresh'],
         }, status=status.HTTP_200_OK)
     return Response({"Mensagem": "Credenciais inválidas"},status=status.HTTP_401_UNAUTHORIZED)  
-
 
 
 
@@ -121,7 +127,7 @@ def handle_sensor(request, pk=None):
                 serializer = SensorSerializer(sensor, data=dados)
                 if serializer.is_valid():
                     serializer.save()
-                    return Response({"Mensagem": "Sensor atualizado com sucesso !"},status=status.HTTP_200_OK)
+                    return Response({"Mensagem": "Sensor atualizado com sucesso !"},status=status.HTTP_202_ACCEPTED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         #Deletar um sensor específico
@@ -129,8 +135,8 @@ def handle_sensor(request, pk=None):
             if pk is not None:
                 sensor = get_object_or_404(Sensor, pk=pk)
                 sensor.delete()
-                return Response({"Mensagem": "Sensor Excluido com sucesso !"},status=status.HTTP_200_OK)
-            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
+                return Response({"Mensagem": "Sensor Excluido com sucesso !"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_404_NOT_FOUND)        
     
 
 
@@ -176,7 +182,7 @@ def handle_ambiente(request, pk=None):
                 serializer = AmbienteSerializer(ambiente, data=dados)
                 if serializer.is_valid():
                     serializer.save()
-                    return Response({"Mensagem": "Ambiente atualizado com sucesso !"},status=status.HTTP_200_OK)
+                    return Response({"Mensagem": "Ambiente atualizado com sucesso !"},status=status.HTTP_202_ACCEPTED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         #Deletar um Ambiente específico
@@ -184,8 +190,8 @@ def handle_ambiente(request, pk=None):
             if pk is not None:
                 ambiente = get_object_or_404(Ambiente, pk=pk)
                 ambiente.delete()
-                return Response({"Mensagem": "Ambiente Excluido com sucesso !"},status=status.HTTP_200_OK)
-            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
+                return Response({"Mensagem": "Ambiente Excluido com sucesso !"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_404_NOT_FOUND)        
     
 
 
@@ -206,7 +212,11 @@ def handle_historico(request, pk=None):
                 dados = get_object_or_404(Historico, pk=pk)
                 serializer = HistoricoSerializer(dados, many=False)
                 return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
-            dados = Historico.objects.all()
+            filtro = HistoricoFilter(request.query_params, queryset=Historico.objects.all())
+            if filtro.is_valid():
+                dados = filtro.qs
+            else:
+                dados = Historico.objects.all()
             serializer = HistoricoSerializer(dados, many=True)
             return Response({"Dados": serializer.data}, status=status.HTTP_200_OK)
 
@@ -227,7 +237,7 @@ def handle_historico(request, pk=None):
                 serializer = HistoricoSerializer(histórico, data=dados)
                 if serializer.is_valid():
                     serializer.save()
-                    return Response({"Mensagem": "histórico atualizado com sucesso !"},status=status.HTTP_200_OK)
+                    return Response({"Mensagem": "histórico atualizado com sucesso !"},status=status.HTTP_202_ACCEPTED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         #Deletar um histórico específico
@@ -235,8 +245,8 @@ def handle_historico(request, pk=None):
             if pk is not None:
                 histórico = get_object_or_404(Historico, pk=pk)
                 histórico.delete()
-                return Response({"Mensagem": "histórico Excluido com sucesso !"},status=status.HTTP_200_OK)
-            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_400_BAD_REQUEST)        
+                return Response({"Mensagem": "histórico Excluido com sucesso !"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"Mensagem": "Erro ao encontrar !"}, status=status.HTTP_404_NOT_FOUND)        
     
   
 @api_view(["GET"])
